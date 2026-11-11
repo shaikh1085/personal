@@ -22,8 +22,14 @@ def run(cmd, cwd=None):
 
 def download(url, folder):
     if "drive.google.com" in url or "docs.google.com" in url:
-        import gdown
-        out = gdown.download(url=url, output=str(folder / "src.mp4"), fuzzy=True, quiet=True)
+        import re, gdown
+        m = re.search(r"/d/([\w-]+)|[?&]id=([\w-]+)", url)
+        fid = (m.group(1) or m.group(2)) if m else None
+        target = str(folder / "src.mp4")
+        if fid:
+            out = gdown.download(id=fid, output=target, quiet=True)
+        else:
+            out = gdown.download(url, output=target, quiet=True)
         if not out:
             raise RuntimeError("Drive link public nahi hai (Anyone with link) ya limit lagi hai.")
         return Path(out)
